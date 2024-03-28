@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model version="6.1.1" links="0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.state-machine.com/qm/qm.xsd">
+ <framework name="qpc"/>
+ <package name="AOs" stereotype="0x02">
+  <class name="Blinky" superclass="qpc::QActive">
+   <documentation>Experimentations with direct posting of immutable events</documentation>
+   <attribute name="time_evt" type="QTimeEvt" visibility="0x02" properties="0x00"/>
+   <attribute name="inst" type="Blinky" visibility="0x00" properties="0x01"/>
+   <statechart properties="0x02">
+    <initial target="../1">
+     <action>Q_UNUSED_PAR(par);
+//QActive_subscribe(&amp;me-&gt;super, TICK_SIG);
+QActive_subscribe((QActive *)me, TICK_SIG);
+QS_OBJ_DICTIONARY(&amp;Blinky_inst);
+QS_SIG_DICTIONARY(TICK_SIG,    (void *)0);</action>
+     <initial_glyph conn="10,5,5,0,21,4">
+      <action box="0,-2,10,2"/>
+     </initial_glyph>
+    </initial>
+    <state name="HSM">
+     <tran trig="BTN_PRESSED">
+      <tran_glyph conn="14,18,3,-1,28,2">
+       <action box="0,-2,14,2"/>
+      </tran_glyph>
+     </tran>
+     <tran trig="TIMEOUT">
+      <tran_glyph conn="14,28,3,-1,28,2">
+       <action box="0,-2,10,2"/>
+      </tran_glyph>
+     </tran>
+     <tran trig="TICK">
+      <action>counter++;
+if(counter%50 == 0)
+{
+    BSP_Toggle();
+}</action>
+      <tran_glyph conn="14,38,3,-1,28,3">
+       <action box="0,-2,10,2"/>
+      </tran_glyph>
+     </tran>
+     <tran trig="TOGGLE_REQUESTED">
+      <tran_glyph conn="14,48,3,-1,28,2">
+       <action box="0,-2,10,2"/>
+      </tran_glyph>
+     </tran>
+     <state_glyph node="14,9,33,46"/>
+    </state>
+    <state_diagram size="59,72"/>
+   </statechart>
+  </class>
+ </package>
+ <package name="Shared" stereotype="0x01">
+  <attribute name="Blinky_AO" type="QActive * const" visibility="0x00" properties="0x00">
+   <code>= &amp;Blinky_inst.super;</code>
+  </attribute>
+  <attribute name="APP_Signals" type="enum" visibility="0x04" properties="0x00">
+   <code>{
+    TICK_SIG = Q_USER_SIG, // published by framework
+    MAX_PUB_SIG,    // the last published signal
+    BTN_PRESSED_SIG,
+    TIMEOUT_SIG,    // posted by time event to Philo
+    TOGGLE_REQUESTED_SIG,
+    MAX_SIG         // the last signal
+};</code>
+  </attribute>
+  <operation name="Blinky_ctor" type="void" visibility="0x00" properties="0x00">
+   <code>Blinky * const me = &amp;Blinky_inst;
+QActive_ctor(&amp;me-&gt;super,Q_STATE_CAST(&amp;Blinky_initial));
+QTimeEvt_ctorX(&amp;me-&gt;time_evt,&amp;me-&gt;super,TIMEOUT_SIG,0);</code>
+  </operation>
+ </package>
+ <directory name="Active_Objects">
+  <file name="Blinky_AO.c">
+   <text>#include &quot;Blinky_AO.h&quot;
+
+$declare${AOs::Blinky}
+
+$define${Shared::Blinky_ctor}
+
+$define${Shared::Blinky_AO}
+
+$define ${AOs::Blinky}</text>
+  </file>
+  <file name="Blinky_AO.h">
+   <text>#ifndef BLINKY_AO
+#define BLINKY_AO
+
+#include &quot;qpc.h&quot;               // QP/C real-time embedded framework
+#include &quot;bsp.h&quot;               // Board Support Package
+
+$declare${Shared}
+
+#endif</text>
+  </file>
+ </directory>
+</model>

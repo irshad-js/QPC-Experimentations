@@ -1,0 +1,13 @@
+identifier: CustomBle
+name: CustomBle
+type: mcu
+arch: arm
+ram: 64
+flash: 512
+toolchain:
+  - zephyr
+  - gnuarmemb
+  - xtools
+supported:
+  - i2c
+  - hts221

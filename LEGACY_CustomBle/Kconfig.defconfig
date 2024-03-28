@@ -1,0 +1,17 @@
+# Thingy52 NRF52832 board configuration
+
+# Copyright (c) 2018 Aapo Vienamo
+# SPDX-License-Identifier: Apache-2.0
+
+if BOARD_CustomBle
+
+config BOARD
+	default "CustomBle"
+
+config I2C
+	default y
+
+config BT_CTLR
+	default BT
+
+endif # BOARD_CustomBle

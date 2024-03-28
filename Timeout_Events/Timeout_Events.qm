@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model version="6.1.1" links="0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.state-machine.com/qm/qm.xsd">
+ <framework name="qpc"/>
+ <package name="AOs" stereotype="0x02">
+  <class name="Blinky" superclass="qpc::QActive">
+   <documentation>Experimentations with Active objects - Timeout events</documentation>
+   <attribute name="timeout_evt" type="QTimeEvt" visibility="0x02" properties="0x00"/>
+   <attribute name="inst" type="Blinky" visibility="0x00" properties="0x01"/>
+   <statechart properties="0x00">
+    <initial target="../1/0">
+     <action>Q_UNUSED_PAR(par);
+QS_OBJ_DICTIONARY(&amp;Blinky_inst);
+QS_SIG_DICTIONARY(TIMEOUT_SIG,    (void *)0);</action>
+     <initial_glyph conn="9,5,5,0,14,11">
+      <action box="0,-2,10,2"/>
+     </initial_glyph>
+    </initial>
+    <state name="HSM">
+     <state name="ON">
+      <entry>QTimeEvt_armX(&amp;me-&gt;timeout_evt, 50, 0U);</entry>
+      <exit>(void)QTimeEvt_disarm(&amp;me-&gt;timeout_evt);
+BSP_Toggle();</exit>
+      <tran trig="TIMEOUT" target="../../1">
+       <tran_glyph conn="13,30,3,3,40">
+        <action box="0,-2,10,2"/>
+       </tran_glyph>
+      </tran>
+      <state_glyph node="13,16,26,23">
+       <entry box="1,2,6,2"/>
+       <exit box="1,4,6,2"/>
+      </state_glyph>
+     </state>
+     <state name="OFF">
+      <entry>QTimeEvt_armX(&amp;me-&gt;timeout_evt, 50, 0U);</entry>
+      <exit>(void)QTimeEvt_disarm(&amp;me-&gt;timeout_evt);
+BSP_Toggle();</exit>
+      <tran trig="TIMEOUT" target="../../0">
+       <tran_glyph conn="79,34,1,1,-40">
+        <action box="0,-3,10,2"/>
+       </tran_glyph>
+      </tran>
+      <state_glyph node="53,16,26,23">
+       <entry box="1,2,6,2"/>
+       <exit box="1,4,6,2"/>
+      </state_glyph>
+     </state>
+     <state_glyph node="9,12,80,31"/>
+    </state>
+    <state_diagram size="109,64"/>
+   </statechart>
+  </class>
+ </package>
+ <package name="Shared" stereotype="0x02">
+  <attribute name="Blinky_AO" type="QActive *const" visibility="0x00" properties="0x00">
+   <code>=&amp;Blinky_inst.super;</code>
+  </attribute>
+  <attribute name="APP_signals" type="enum" visibility="0x04" properties="0x00">
+   <code>{
+    TIMEOUT_SIG = Q_USER_SIG,
+    MAX_SIG         // the last signal
+};</code>
+  </attribute>
+  <operation name="Blinky_ctor" type="void" visibility="0x00" properties="0x00">
+   <code>Blinky * const me = &amp;Blinky_inst;
+QActive_ctor(&amp;me-&gt;super,Q_STATE_CAST(&amp;Blinky_initial));
+QTimeEvt_ctorX(&amp;me-&gt;timeout_evt,&amp;me-&gt;super,TIMEOUT_SIG,0);</code>
+  </operation>
+ </package>
+ <directory name="Active_Objects">
+  <file name="Blinky_AO.h">
+   <text>#ifndef BLINKY_AO
+#define BLINKY_AO
+
+#include &quot;qpc.h&quot;               // QP/C real-time embedded framework
+#include &quot;bsp.h&quot;               // Board Support Package
+
+$declare${Shared}
+
+#endif</text>
+  </file>
+  <file name="Blinky_AO.c">
+   <text>#include &quot;Blinky_AO.h&quot;
+
+$declare${AOs::Blinky}
+
+$define${Shared::Blinky_ctor}
+
+$define${Shared::Blinky_AO}
+
+$define ${AOs::Blinky}</text>
+  </file>
+ </directory>
+</model>
